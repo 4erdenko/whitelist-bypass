@@ -674,6 +674,7 @@ func (rb *RelayBridge) handleSOCKS(conn net.Conn) {
 	rb.logFn("relay: SOCKS CONNECTED %d -> %s rdy_wait=%s", id, common.MaskAddr(host), time.Since(rdyStart))
 
 	go func() {
+		defer conn.Close()
 		readBuf := make([]byte, rb.readBuf)
 		var totalSent int64
 		var sends int

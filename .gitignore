@@ -9,3 +9,10 @@ whitelist-experiments/
 
 headless/tests/stand/.context/
 headless/tests/.env
+
+# Private experiment state and generated artifacts
+.my_local_dev/
+*.private*
+*.log
+*.jsonl
+**/__pycache__/

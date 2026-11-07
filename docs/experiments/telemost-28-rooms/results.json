@@ -1,0 +1,56 @@
+[
+  {
+    "config": {
+      "name": "single-ip-28",
+      "rooms": 28,
+      "accounts": 1,
+      "vps_rooms": 0,
+      "poll": 120,
+      "hold": 600
+    },
+    "ready_rooms": 28,
+    "ramp_complete": true,
+    "hold_seconds": 727.2745784170111,
+    "health_passed": 554,
+    "health_total": 560,
+    "payload_passed": 112,
+    "payload_total": 112,
+    "payload_over_30_seconds": 0,
+    "api_429": 0,
+    "api_counts_delta": {
+      "granted": 2190,
+      "200": 2188,
+      "0": 1
+    },
+    "failure": null,
+    "clean": false,
+    "remote_stopped": true
+  },
+  {
+    "config": {
+      "name": "two-ip-28-endurance",
+      "rooms": 28,
+      "accounts": 1,
+      "vps_rooms": 10,
+      "poll": 120,
+      "hold": 7200
+    },
+    "ready_rooms": 28,
+    "ramp_complete": true,
+    "hold_seconds": 7400.603749333008,
+    "health_passed": 6633,
+    "health_total": 6720,
+    "payload_passed": 1344,
+    "payload_total": 1344,
+    "payload_over_30_seconds": 1,
+    "api_429": 0,
+    "api_counts_delta": {
+      "granted": 14587,
+      "200": 14576,
+      "0": 11
+    },
+    "failure": null,
+    "clean": false,
+    "remote_stopped": true
+  }
+]

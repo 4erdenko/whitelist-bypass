@@ -2,6 +2,10 @@
 
 Tunnels internet traffic through video calling platforms (VK Call, Yandex Telemost, WB Stream, DION, Bitrix24, Blink) to bypass government whitelist censorship.
 
+## FRDM experimental branch
+
+This fork's `codex/telemost-stability` branch carries the Telemost request queue, bounded retry and HTTP/1.1 cancellation fixes, plus the isolated room experiment. See [experiment setup](experiments/telemost/README.md), [the 28-room report](docs/experiments/telemost-28-rooms/REPORT.md), and [the patched dependency](third_party/README.md). The historical two-hour run completed with all file transfers intact but some HTTP probe timeouts; it is not an error-free stability pass or a mobile allowlist result.
+
 ## Setup
 
 Step-by-step setup guide (in Russian): [docs/SETUP.md](docs/SETUP.md)

@@ -1,0 +1,50 @@
+{
+  "gate_account_rpm": 180,
+  "gate_ip_rpm": 180,
+  "start_interval_seconds": 13,
+  "health_interval_seconds": 30,
+  "payload_interval_seconds": 300,
+  "payload_mib": 1,
+  "health_timeout_seconds": 10,
+  "payload_timeout_seconds": 60,
+  "cooldown_between_phases_seconds": 120,
+  "cooldown_after_429_seconds": 600,
+  "maximum_duration_seconds": 14400,
+  "soak_seconds": 7200,
+  "phases": [
+    {
+      "name": "single-ip-28",
+      "rooms": 28,
+      "accounts": 1,
+      "vps_rooms": 0,
+      "poll": 120,
+      "hold": 600
+    },
+    {
+      "name": "two-ip-28-endurance",
+      "rooms": 28,
+      "accounts": 1,
+      "vps_rooms": 10,
+      "poll": 120,
+      "hold": 7200
+    }
+  ],
+  "stop_conditions": [
+    "Three 429 responses in a phase",
+    "Three consecutive failed health rounds for any room",
+    "Payload size or hash mismatch",
+    "Host memory guard",
+    "Maximum experiment duration"
+  ],
+  "selection": "Fixed comparison: 28 rooms on one IP, then 28 rooms split across two IPs for two hours. The same account and room set are reused.",
+  "limitations": [
+    "One specific authorized account",
+    "Two existing egress networks",
+    "No mobile allowlist",
+    "One-factor comparisons are sequential, not randomized replicated trials",
+    "No production capacity guarantee"
+  ],
+  "hard_cap_total_rooms": 28,
+  "waiting_poll_behavior": "5-second admission polling while no peer is present; configured slower polling after a peer connects.",
+  "payload_service_target_seconds": 30
+}

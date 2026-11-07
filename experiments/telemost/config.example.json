@@ -1,0 +1,6 @@
+{
+  "ssh_target": "root@lab.example.invalid",
+  "ssh_key": "~/.ssh/test_host_key",
+  "ssh_port": 22,
+  "remote_dir": "/opt/telemost-lab"
+}

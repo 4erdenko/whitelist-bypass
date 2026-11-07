@@ -663,6 +663,16 @@ func (b *Bridge) kickPeer(peerID string) error {
 	return nil
 }
 
+func waitingRoomInterval() time.Duration {
+	interval := 120 * time.Second
+	if raw := os.Getenv("TM_WAITING_POLL"); raw != "" {
+		if value, err := time.ParseDuration(raw); err == nil && value >= 5*time.Second && value <= 5*time.Minute {
+			interval = value
+		}
+	}
+	return interval
+}
+
 func (b *Bridge) pollAndAdmit() {
 	confURL := url.QueryEscape(b.connInfo.ConferenceURI)
 	r, status, err := tmRequest("GET", "/conferences/"+confURL+"/waiting-rooms/peers", nil, b.cookieStr, b.config)
@@ -807,12 +817,20 @@ func (b *Bridge) run() {
 		go func() {
 			ticker := time.NewTicker(5 * time.Second)
 			defer ticker.Stop()
+			lastPoll := time.Now()
 			for {
 				select {
 				case <-stopWaitingRoomPoll:
 					return
 				case <-ticker.C:
+					b.mu.Lock()
+					hasPeer := len(b.peers) > 0
+					b.mu.Unlock()
+					if hasPeer && time.Since(lastPoll) < waitingRoomInterval() {
+						continue
+					}
 					b.pollAndAdmit()
+					lastPoll = time.Now()
 				}
 			}
 		}()
@@ -980,7 +998,7 @@ func main() {
 		cookieStr = *cookieString
 	} else if *cookiesPath != "" {
 		cookieStr = common.LoadCookies(*cookiesPath)
-	} else {
+	} else if *tmLink == "" {
 		fmt.Println("WAITING_FOR_COOKIES")
 		line, err := bufio.NewReader(os.Stdin).ReadString('\n')
 		if err != nil || strings.TrimSpace(line) == "" {
@@ -989,7 +1007,7 @@ func main() {
 		cookieStr = strings.TrimSpace(line)
 	}
 
-	if common.CookieValue(cookieStr, "Session_id") == "" {
+	if *tmLink == "" && common.CookieValue(cookieStr, "Session_id") == "" {
 		common.EmitAuthError(common.AuthErrorSessionExpired)
 		log.Fatalf("[auth] cookies missing Session_id; log into Yandex and re-export via creator-app's 'Export Cookies' button")
 	}

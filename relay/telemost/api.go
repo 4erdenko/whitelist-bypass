@@ -221,13 +221,7 @@ func (c *Client) Do(method, path string, body interface{}) ([]byte, int, error) 
 	if client == nil {
 		client = headless.ChromeWindows.HTTPClient()
 	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, 0, err
-	}
-	defer resp.Body.Close()
-	data, err := io.ReadAll(resp.Body)
-	return data, resp.StatusCode, err
+	return managedRequest(client, req)
 }
 
 func (c *Client) RequestStates(joinURI, peerID string) error {

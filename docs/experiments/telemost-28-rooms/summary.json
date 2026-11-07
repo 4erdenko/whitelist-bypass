@@ -1,0 +1,244 @@
+{
+  "results": [
+    {
+      "config": {
+        "name": "single-ip-28",
+        "rooms": 28,
+        "accounts": 1,
+        "vps_rooms": 0,
+        "poll": 120,
+        "hold": 600
+      },
+      "ready_rooms": 28,
+      "ramp_complete": true,
+      "hold_seconds": 727.2745784170111,
+      "health_passed": 554,
+      "health_total": 560,
+      "payload_passed": 112,
+      "payload_total": 112,
+      "payload_over_30_seconds": 0,
+      "api_429": 0,
+      "api_counts_delta": {
+        "granted": 2190,
+        "200": 2188,
+        "0": 1
+      },
+      "failure": null,
+      "clean": false,
+      "remote_stopped": true
+    },
+    {
+      "config": {
+        "name": "two-ip-28-endurance",
+        "rooms": 28,
+        "accounts": 1,
+        "vps_rooms": 10,
+        "poll": 120,
+        "hold": 7200
+      },
+      "ready_rooms": 28,
+      "ramp_complete": true,
+      "hold_seconds": 7400.603749333008,
+      "health_passed": 6633,
+      "health_total": 6720,
+      "payload_passed": 1344,
+      "payload_total": 1344,
+      "payload_over_30_seconds": 1,
+      "api_429": 0,
+      "api_counts_delta": {
+        "granted": 14587,
+        "200": 14576,
+        "0": 11
+      },
+      "failure": null,
+      "clean": false,
+      "remote_stopped": true
+    }
+  ],
+  "observed_api_requests_per_minute_peak": {
+    "mac": 124,
+    "vps": 30
+  },
+  "api_status_counts": {
+    "200": 16768,
+    "0": 12
+  },
+  "gate_queue_timeouts": 0,
+  "gate_expired_leases": 1,
+  "gate_cancelled_waiters": 132,
+  "ssh_failed_attempts": 0,
+  "ssh_recoveries": 0,
+  "ssh_forward_restarts": 0,
+  "measurements": {
+    "single-ip-28": {
+      "http_median_seconds": 1.0181,
+      "http_p95_seconds": 2.4467,
+      "download_median_mbps": 0.5185,
+      "upload_median_mbps": 0.6655,
+      "payload_over_30_seconds": 0,
+      "api_statuses": {
+        "200": 2188,
+        "0": 1
+      },
+      "api_network_error_seconds": [
+        10.648984125
+      ],
+      "api_protocols": {
+        "HTTP/1.1": 2188
+      },
+      "queue_p95_seconds": 36.25727870903211,
+      "rate_limit_operations": [],
+      "steady_api_rpm": {
+        "mac:joiner": 53.1,
+        "mac:creator": 64.3
+      },
+      "successful_connection_refreshes_in_hold": 0,
+      "first_ten_minutes": {
+        "health_passed": 554,
+        "health_total": 560,
+        "payload_passed": 56,
+        "payload_total": 56,
+        "http_median_seconds": 1.0181,
+        "http_p95_seconds": 2.4467,
+        "download_median_mbps": 0.543,
+        "upload_median_mbps": 0.6675,
+        "payload_over_30_seconds": 0,
+        "api_429": 0
+      },
+      "creator_egress_groups": {
+        "mac": {
+          "health_passed": 554,
+          "health_total": 560,
+          "payload_passed": 112,
+          "payload_total": 112,
+          "http_median_seconds": 1.0181,
+          "http_p95_seconds": 2.4467,
+          "download_median_mbps": 0.5185,
+          "upload_median_mbps": 0.6655,
+          "payload_over_30_seconds": 0
+        }
+      },
+      "health_by_load": {
+        "overlapping_file_transfer": {
+          "health_passed": 28,
+          "health_total": 34,
+          "payload_passed": 0,
+          "payload_total": 0,
+          "http_median_seconds": 4.18365,
+          "http_p95_seconds": 7.8184,
+          "download_median_mbps": null,
+          "upload_median_mbps": null,
+          "payload_over_30_seconds": 0
+        },
+        "without_file_transfer": {
+          "health_passed": 526,
+          "health_total": 526,
+          "payload_passed": 0,
+          "payload_total": 0,
+          "http_median_seconds": 1.0125,
+          "http_p95_seconds": 1.9956,
+          "download_median_mbps": null,
+          "upload_median_mbps": null,
+          "payload_over_30_seconds": 0
+        }
+      },
+      "observed_waiting_poll_median_seconds": 151.64985406398773
+    },
+    "two-ip-28-endurance": {
+      "http_median_seconds": 0.9755,
+      "http_p95_seconds": 4.2017,
+      "download_median_mbps": 0.659,
+      "upload_median_mbps": 0.7275,
+      "payload_over_30_seconds": 1,
+      "api_statuses": {
+        "200": 14580,
+        "0": 11
+      },
+      "api_network_error_seconds": [
+        20.000963416,
+        15.000919625,
+        15.000464917,
+        20.000466458,
+        15.00021825,
+        20.000269625,
+        15.000656,
+        20.000688458,
+        15.000334041,
+        15.000696291,
+        15.000127792
+      ],
+      "api_protocols": {
+        "HTTP/1.1": 14580
+      },
+      "queue_p95_seconds": 39.243649667012505,
+      "rate_limit_operations": [],
+      "steady_api_rpm": {
+        "mac:creator": 39.65833333333333,
+        "mac:joiner": 50.94166666666667,
+        "vps:creator": 21.9
+      },
+      "successful_connection_refreshes_in_hold": 0,
+      "first_ten_minutes": {
+        "health_passed": 556,
+        "health_total": 560,
+        "payload_passed": 56,
+        "payload_total": 56,
+        "http_median_seconds": 0.9567000000000001,
+        "http_p95_seconds": 2.5123,
+        "download_median_mbps": 0.6685000000000001,
+        "upload_median_mbps": 0.734,
+        "payload_over_30_seconds": 0,
+        "api_429": 0
+      },
+      "creator_egress_groups": {
+        "mac": {
+          "health_passed": 4233,
+          "health_total": 4320,
+          "payload_passed": 864,
+          "payload_total": 864,
+          "http_median_seconds": 1.0118,
+          "http_p95_seconds": 5.0369,
+          "download_median_mbps": 0.615,
+          "upload_median_mbps": 0.655,
+          "payload_over_30_seconds": 1
+        },
+        "vps": {
+          "health_passed": 2400,
+          "health_total": 2400,
+          "payload_passed": 480,
+          "payload_total": 480,
+          "http_median_seconds": 0.8377,
+          "http_p95_seconds": 2.8541,
+          "download_median_mbps": 0.7324999999999999,
+          "upload_median_mbps": 0.9165000000000001,
+          "payload_over_30_seconds": 0
+        }
+      },
+      "health_by_load": {
+        "overlapping_file_transfer": {
+          "health_passed": 588,
+          "health_total": 675,
+          "payload_passed": 0,
+          "payload_total": 0,
+          "http_median_seconds": 4.70205,
+          "http_p95_seconds": 9.0448,
+          "download_median_mbps": null,
+          "upload_median_mbps": null,
+          "payload_over_30_seconds": 0
+        },
+        "without_file_transfer": {
+          "health_passed": 6045,
+          "health_total": 6045,
+          "payload_passed": 0,
+          "payload_total": 0,
+          "http_median_seconds": 0.9605,
+          "http_p95_seconds": 1.6956,
+          "download_median_mbps": null,
+          "upload_median_mbps": null,
+          "payload_over_30_seconds": 0
+        }
+      },
+      "observed_waiting_poll_median_seconds": 155.41020798683167
+    }
+  }
+}
