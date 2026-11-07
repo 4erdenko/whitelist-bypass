@@ -1,0 +1,102 @@
+// SPDX-FileCopyrightText: 2026 The Pion community <https://pion.ly>
+// SPDX-License-Identifier: MIT
+
+package state
+
+import (
+	dtlsciphersuite "github.com/kulikov0/headless-client/internal/dtls/internal/ciphersuite"
+	dtlserrors "github.com/kulikov0/headless-client/internal/dtls/internal/errors"
+	cryptosuite "github.com/kulikov0/headless-client/internal/dtls/pkg/crypto/ciphersuite"
+	"github.com/kulikov0/headless-client/internal/dtls/pkg/crypto/elliptic"
+	"github.com/kulikov0/headless-client/internal/dtls/pkg/crypto/signaturehash"
+	"github.com/kulikov0/headless-client/internal/dtls/pkg/protocol/handshake"
+)
+
+// State12 holds state that is meaningful only for DTLS 1.2.
+type State12 struct {
+	*Common
+	Protection cryptosuite.Protection
+
+	PreMasterSecret []byte
+	MasterSecret    []byte
+
+	ExtendedMasterSecret        bool
+	RemoteSupportsRenegotiation bool
+
+	NamedCurve   elliptic.Curve
+	LocalKeypair *elliptic.Keypair
+
+	Cookie                []byte
+	HasHelloVerifyRequest bool
+	HandshakeSendSequence int
+	HandshakeRecvSequence int
+
+	RemoteCertRequestAlgs      []signaturehash.Algorithm
+	RemoteSignatureSchemes     []signaturehash.Algorithm // signature_algorithms from peer
+	RemoteCertSignatureSchemes []signaturehash.Algorithm // signature_algorithms_cert from peer
+
+	RemoteRequestedCertificate bool
+	LocalCertificatesVerify    []byte
+	LocalVerifyData            []byte
+	LocalKeySignature          []byte
+
+	PeerCertificatesVerified bool
+
+	remoteServerKeyExchange *handshake.MessageServerKeyExchange
+}
+
+// SetRemoteServerKeyExchange retains the parsed server key exchange for the
+// remainder of the handshake.
+func (s *State12) SetRemoteServerKeyExchange(message *handshake.MessageServerKeyExchange) {
+	s.remoteServerKeyExchange = message
+}
+
+// RemoteServerKeyExchange returns the parsed server key exchange.
+func (s *State12) RemoteServerKeyExchange() *handshake.MessageServerKeyExchange {
+	return s.remoteServerKeyExchange
+}
+
+// ShouldWrapConnectionID reports whether outgoing DTLS 1.2 records should
+// use CID record encoding.
+func (s *State12) ShouldWrapConnectionID() bool {
+	return len(s.RemoteConnectionID) > 0
+}
+
+func (s *State12) InitCipherSuite() error {
+	if s.CipherSuite == nil {
+		return dtlserrors.ErrCipherSuiteNotSet
+	}
+	if s.Protection != nil {
+		return nil
+	}
+
+	localRandom := s.LocalRandom.MarshalFixed()
+	remoteRandom := s.RemoteRandom.MarshalFixed()
+
+	role := cryptosuite.EndpointRoleServer
+	if s.IsClient {
+		role = cryptosuite.EndpointRoleClient
+	}
+	clientRandom, serverRandom := remoteRandom[:], localRandom[:]
+	if s.IsClient {
+		clientRandom, serverRandom = localRandom[:], remoteRandom[:]
+	}
+	material, err := dtlsciphersuite.NewKeyMaterial(s.MasterSecret, clientRandom, serverRandom, role)
+	if err != nil {
+		return err
+	}
+	factory, ok := s.CipherSuite.(cryptosuite.ConnectionSuite)
+	if !ok {
+		return dtlserrors.ErrInvalidCipherSuite
+	}
+	protection, err := factory.NewConnectionProtection(material)
+	if err != nil {
+		return err
+	}
+	if protection == nil {
+		return dtlserrors.ErrInvalidCipherSuite
+	}
+	s.Protection = protection
+
+	return nil
+}

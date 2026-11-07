@@ -1,0 +1,88 @@
+diff --git a/conn.go b/conn.go
+index a241bf2..e0fd417 100644
+--- a/conn.go
++++ b/conn.go
+@@ -48,6 +48,7 @@ const (
+ 	maxPlaintextRecordLen         = 1 << 14
+ 	maxCIDInnerPlaintextLen       = maxPlaintextRecordLen
+ 	maxDTLS13InnerPlaintextLen    = maxPlaintextRecordLen + 1
++	innerPlaintextContentTypeLen  = 1
+ 	// maxAppDataPacketQueueSize is the maximum number of app data packets we will.
+ 	// enqueue before the handshake is completed.
+ 	maxAppDataPacketQueueSize = 100
+@@ -1154,7 +1155,12 @@ type preparedRecord struct {
+ }
+ 
+ func (c *Conn) prepareHandshakeRecords(outbound *dtlsflight.Outbound, dtlsHandshake *handshake.Handshake) ([]preparedRecord, error) {
+-	handshakeFragments, err := c.fragmentHandshake(dtlsHandshake)
++	recordOverhead, err := c.handshakeRecordOverhead(outbound.Epoch, outbound.Protection)
++	if err != nil {
++		return nil, err
++	}
++
++	handshakeFragments, err := c.fragmentHandshake(dtlsHandshake, recordOverhead)
+ 	if err != nil {
+ 		return nil, err
+ 	}
+@@ -1214,7 +1220,7 @@ func selectHandshakeFragment(offsets map[uint32]uint32, raw []byte) (bool, error
+ 	return ok && length == header.FragmentLength, nil
+ }
+ 
+-func (c *Conn) fragmentHandshake(dtlsHandshake *handshake.Handshake) ([][]byte, error) {
++func (c *Conn) fragmentHandshake(dtlsHandshake *handshake.Handshake, recordOverhead int) ([][]byte, error) {
+ 	content, err := dtlsHandshake.Message.Marshal()
+ 	if err != nil {
+ 		return nil, err
+@@ -1222,7 +1228,7 @@ func (c *Conn) fragmentHandshake(dtlsHandshake *handshake.Handshake) ([][]byte,
+ 
+ 	fragmentedHandshakes := make([][]byte, 0)
+ 
+-	contentFragments := util.SplitBytes(content, c.maximumTransmissionUnit)
++	contentFragments := util.SplitBytes(content, c.maxHandshakeFragmentLength(recordOverhead))
+ 	if len(contentFragments) == 0 {
+ 		contentFragments = [][]byte{
+ 			{},
+@@ -1255,6 +1261,43 @@ func (c *Conn) fragmentHandshake(dtlsHandshake *handshake.Handshake) ([][]byte,
+ 	return fragmentedHandshakes, nil
+ }
+ 
++func (c *Conn) maxHandshakeFragmentLength(recordOverhead int) int {
++	available := c.maximumTransmissionUnit - recordOverhead - handshake.HeaderLength
++	if available < 1 {
++		return 1
++	}
++
++	return available
++}
++
++func (c *Conn) handshakeRecordOverhead(epoch uint16, protection dtlsflight.Protection) (int, error) {
++	common := dtlsstate.CommonState(c.state)
++	if protection != dtlsflight.ProtectionCiphertext || common.LocalVersion != protocol.Version1_3 {
++		return recordlayer.FixedHeaderSize, nil
++	}
++	if common.CipherSuite == nil {
++		return 0, dtlserrors.ErrCipherSuiteNotInit
++	}
++	if _, err := c.writeTrafficGeneration(epoch); err != nil {
++		return 0, err
++	}
++	protectedLen, err := common.CipherSuite.Capabilities().ProtectedLen(innerPlaintextContentTypeLen)
++	if err != nil {
++		return 0, err
++	}
++	header := recordlayer.UnifiedHeader{SeqBit: true, LengthBit: true}
++	if state13, ok := c.state.(*dtlsstate.State13); ok &&
++		state13.CID.Negotiated && state13.CID.Send.UseCID {
++		header.ConnectionID = bytes.Clone(state13.CID.Send.Active)
++	}
++	marshalled, err := header.Marshal()
++	if err != nil {
++		return 0, err
++	}
++
++	return len(marshalled) + protectedLen, nil
++}
++
+ // readBufferPools caches read buffer pools by size so buffers are reused across
+ // connections. Only a small bounded set of distinct sizes is expected in a
+ // program.

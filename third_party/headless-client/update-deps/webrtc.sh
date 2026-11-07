@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO="$(cd "$(dirname "$0")/.." && pwd)"
+UD="$REPO/update-deps"
+VERSION="${1:-v4.2.11}"
+DST="$REPO/webrtc"
+OLD_WEBRTC="github.com/pion/webrtc/v4"
+OLD_DTLS="github.com/pion/dtls/v3"
+OLD_ICE="github.com/pion/ice/v4"
+NEW_WEBRTC="github.com/kulikov0/headless-client/webrtc"
+NEW_DTLS="github.com/kulikov0/headless-client/internal/dtls"
+NEW_ICE="github.com/kulikov0/headless-client/internal/ice"
+
+. "$UD/common.sh"
+
+go -C "$REPO" mod download "$OLD_WEBRTC@$VERSION"
+SRC="$(go env GOMODCACHE)/$OLD_WEBRTC@$VERSION"
+if [ ! -d "$SRC" ]; then
+  echo "webrtc $VERSION not in module cache at $SRC" >&2
+  exit 1
+fi
+
+rm -rf "$DST"
+cp -R "$SRC" "$DST"
+chmod -R u+w "$DST"
+rm -rf "$DST/.git" "$DST/.github" "$DST/go.mod" "$DST/go.sum"
+find "$DST" -type d -name '.git' -exec rm -rf {} + 2>/dev/null || true
+find "$DST" -name '*_test.go' -delete
+find "$DST" -type d \( -name testdata -o -name examples -o -name e2e \) -exec rm -rf {} + 2>/dev/null || true
+rm -rf "$DST/test-wasm"
+rm -f "$DST/codecov.yml" "$DST/renovate.json" "$DST/.gitignore" "$DST/.golangci.yml" \
+  "$DST/.goreleaser.yml" "$DST/.editorconfig" "$DST/.codacy.yaml" "$DST/.eslintrc.json" \
+  "$DST/package.json" "$DST/yarn.lock" "$DST/DESIGN.md"
+find "$DST" -name 'README.md' -delete
+
+grep -rl "$OLD_WEBRTC\|$OLD_DTLS\|$OLD_ICE" "$DST" --include='*.go' | while read -r f; do
+  perl -pi -e "s#\\Q$OLD_WEBRTC\\E#$NEW_WEBRTC#g; s#\\Q$OLD_DTLS\\E#$NEW_DTLS#g; s#\\Q$OLD_ICE\\E#$NEW_ICE#g" "$f"
+done
+
+if grep -rq "$OLD_WEBRTC\|$OLD_DTLS\|$OLD_ICE" "$DST" --include='*.go'; then
+  echo "residual upstream references remain" >&2
+  exit 1
+fi
+
+gofmt -w "$DST"
+
+apply_patch "$DST" "$UD/webrtc-header-extension-order.patch"
+apply_patch "$DST" "$UD/webrtc-answer-codec-order.patch"
+apply_patch "$DST" "$UD/webrtc-rtcp-cname.patch"
+apply_patch "$DST" "$UD/webrtc-msid-track-identity.patch"
+apply_patch "$DST" "$UD/webrtc-ssrc-attributes.patch"
+apply_patch "$DST" "$UD/webrtc-msid-semantic.patch"
+apply_patch "$DST" "$UD/webrtc-answer-msid-signaling.patch"
+apply_patch "$DST" "$UD/webrtc-track-constructor-args.patch"
+apply_patch "$DST" "$UD/webrtc-session-origin.patch"
+apply_patch "$DST" "$UD/webrtc-codec-feedback.patch"
+apply_patch "$DST" "$UD/webrtc-answer-feedback-order.patch"
+apply_patch "$DST" "$UD/webrtc-attribute-order.patch"
+
+go -C "$REPO" build ./webrtc/...
+echo "webrtc regenerated from $OLD_WEBRTC@$VERSION"
